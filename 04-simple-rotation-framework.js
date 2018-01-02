@@ -1,10 +1,6 @@
 var container, camera, scene, light, renderer;
 var camera_spherical;
 
-init();
-draw();
-animate();
-
 function init() {
     init_renderer();
     init_container();
@@ -37,7 +33,7 @@ function init_camera() {
     // camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     // initialize the campera's position
-    camera_spherical = new THREE.Spherical(100, Math.PI / 2, 0);
+    camera_spherical = new THREE.Spherical(500, Math.PI / 2, 0);
     move_camera();
 }
 
@@ -61,7 +57,6 @@ function move_camera(){
     camera.position.setFromSpherical(camera_spherical);
     camera.lookAt(0,0,0);    
 }
-
 
 function draw_axes() {
     var material, geometry, line;
@@ -92,6 +87,21 @@ function draw_axes() {
     scene.add(line);
 }
 
+
+var pipe_material = new THREE.MeshPhongMaterial({
+        color: 0x222222,
+        flatShading: true,
+        vertexColors: THREE.VertexColors,
+        shininess: 0
+    });
+
+var wood_material = new THREE.MeshPhongMaterial({
+        color: 0x835C3B,
+        flatShading: true,
+        vertexColors: THREE.VertexColors,
+        shininess: 0.5
+    });
+
 function draw_model() {
     var material, geometry, cube, cylinder;
 
@@ -101,19 +111,91 @@ function draw_model() {
     // cube = new THREE.Mesh( geometry, material );
     // scene.add( cube );
 
-    geometry = new THREE.CylinderGeometry( 2.5, 2.5, 5, 64 );
-    //geometry.translate(5, 5, 5);
-    //material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-    material = new THREE.MeshPhongMaterial({
-        color: 0xffff00,
-        flatShading: true,
-        vertexColors: THREE.VertexColors,
-        shininess: 0
-    });
+    // geometry = new THREE.CylinderGeometry( 4/2, 4/2, 0.25, 64 );
+    // geometry.translate(4, 0, 4);
 
-    cylinder = new THREE.Mesh( geometry, material );
+    // cylinder = new THREE.Mesh( geometry, pipe_material );
+    // scene.add( cylinder );
+
+    var height = -30;
+
+    draw_legs(height,16);
+    height += 16;
+    draw_plywood(height);
+    height += 0.75;
+
+    draw_legs(height,16);
+    height += 16;
+    draw_plywood(height);
+    height += 0.75;
+
+    draw_legs(height,12);
+    height += 12;
+    draw_plywood(height);
+    height += 0.75;
+
+    draw_legs(height,10);
+    height += 10;
+    draw_plywood(height);
+    height += 0.75;
+}
+
+function draw_legs(y, length) {
+    draw_leg(-22, y, -6, length);
+    draw_leg(-22, y,  6, length);
+    draw_leg( 22, y, -6, length);
+    draw_leg( 22, y,  6, length);
+}
+
+
+function draw_leg(x, y, z, length) {
+    draw_flang( x, y, z, false);
+    draw_pipe_y(x, y+0.5, z, length-1.0);
+    draw_flang( x, y+length-0.5, z, true);    
+}
+
+function draw_plywood(height) {
+    geometry = new THREE.BoxGeometry( 48, 0.75, 16 );
+    geometry.translate(0, height + 0.375, 0);
+    cube = new THREE.Mesh( geometry, wood_material );
+    scene.add( cube );    
+}
+
+
+function draw_flang(x, y, z,inverted) {
+    var geometry1 = new THREE.CylinderGeometry( 2, 2, 0.25, 64 );
+    var geometry2 = new THREE.CylinderGeometry( 1, 1, 0.25, 64 );
+    var cylinder;
+
+    if (inverted)
+    {
+        geometry1.translate(x, y+0.375, z);
+        geometry2.translate(x, y+0.125, z);    
+    }
+    else
+    {
+        geometry1.translate(x, y+0.125, z);
+        geometry2.translate(x, y+0.375, z);
+    }
+        
+    cylinder = new THREE.Mesh( geometry1, pipe_material );
+    scene.add( cylinder );
+
+    cylinder = new THREE.Mesh( geometry2, pipe_material );
     scene.add( cylinder );
 }
+
+function draw_pipe_y(x, y, z, length) {
+    var cylinder, offset;
+
+    geometry = new THREE.CylinderGeometry( 0.75, 0.75, length, 64 );
+    offset = length / 2;
+    geometry.translate(x, y+offset, z);
+    cylinder = new THREE.Mesh( geometry, pipe_material );
+    scene.add( cylinder );
+}
+
+
 
 
 function animate () {
@@ -172,3 +254,7 @@ function show_camera_postion() {
     document.getElementById('camera-y').textContent = camera.position.y.toFixed(2);
     document.getElementById('camera-z').textContent = camera.position.z.toFixed(2);    
 }
+
+init();
+draw();
+animate();
