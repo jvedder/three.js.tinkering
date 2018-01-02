@@ -39,10 +39,11 @@ function init_camera() {
 
 function init_scene() {
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x808080);
 }
 
 function init_light() {
-    scene.add(new THREE.AmbientLight(0x555555));
+    scene.add(new THREE.AmbientLight(0x808080));
     light = new THREE.SpotLight(0xffffff, 1.5);
     light.position.set(0, 500, 2000);
     scene.add(light);   
@@ -105,26 +106,16 @@ var wood_material = new THREE.MeshPhongMaterial({
 function draw_model() {
     var material, geometry, cube, cylinder;
 
-    // geometry = new THREE.BoxGeometry( 5, 5, 5 );
-    // geometry.translate(2.5, 2.5, 2.5);
-    // material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    // cube = new THREE.Mesh( geometry, material );
-    // scene.add( cube );
-
-    // geometry = new THREE.CylinderGeometry( 4/2, 4/2, 0.25, 64 );
-    // geometry.translate(4, 0, 4);
-
-    // cylinder = new THREE.Mesh( geometry, pipe_material );
-    // scene.add( cylinder );
-
     var height = -30;
 
     draw_legs(height,16);
+    draw_cross_bars(height + 4);
     height += 16;
     draw_plywood(height);
     height += 0.75;
 
     draw_legs(height,16);
+    draw_cross_bars(height + 4);
     height += 16;
     draw_plywood(height);
     height += 0.75;
@@ -147,6 +138,15 @@ function draw_legs(y, length) {
     draw_leg( 22, y,  6, length);
 }
 
+function draw_cross_bars(height) {
+    draw_tee_y(-22, height, -6, false);
+    draw_tee_y(-22, height,  6, true);
+    draw_tee_y( 22, height, -6, false);
+    draw_tee_y( 22, height,  6, true);
+
+    draw_pipe_z(-22, height+(3.5/2), 0, 12);
+    draw_pipe_z( 22, height+(3.5/2), 0, 12);
+}
 
 function draw_leg(x, y, z, length) {
     draw_flang( x, y, z, false);
@@ -160,7 +160,6 @@ function draw_plywood(height) {
     cube = new THREE.Mesh( geometry, wood_material );
     scene.add( cube );    
 }
-
 
 function draw_flang(x, y, z,inverted) {
     var geometry1 = new THREE.CylinderGeometry( 2, 2, 0.25, 64 );
@@ -195,7 +194,40 @@ function draw_pipe_y(x, y, z, length) {
     scene.add( cylinder );
 }
 
+function draw_pipe_z(x, y, z, length) {
+    var cylinder, offset;
 
+    geometry = new THREE.CylinderGeometry( 0.75, 0.75, length, 64 );
+    geometry.lookAt(new THREE.Vector3(0,1,0));
+    geometry.translate(x, y, z);
+    cylinder = new THREE.Mesh( geometry, pipe_material );
+    scene.add( cylinder );
+}
+
+function draw_tee_y(x, y, z, inverted) {
+    var cylinder, height, width, radius;
+
+    height = 3.5;
+    width = 1.75;
+    radius = 1.0;
+    geometry = new THREE.CylinderGeometry( radius, radius, height, 64 );
+    geometry.translate(x, y + (height/2), z);
+    cylinder = new THREE.Mesh( geometry, pipe_material );
+    scene.add( cylinder );
+
+    geometry = new THREE.CylinderGeometry( radius, radius, width, 64 );
+    geometry.lookAt(new THREE.Vector3(0,1,0));
+    if (inverted)
+    {
+        geometry.translate(x, y + (height/2), z - (width/2));    
+    }
+    else
+    {
+        geometry.translate(x, y + (height/2), z + (width/2));
+    }
+    cylinder = new THREE.Mesh( geometry, pipe_material );
+    scene.add( cylinder );
+}
 
 
 function animate () {
