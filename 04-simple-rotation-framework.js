@@ -1,4 +1,5 @@
 var container, camera, scene, light, renderer;
+var camera_spherical;
 
 init();
 draw();
@@ -31,9 +32,13 @@ function init_container() {
 }
 
 function init_camera() {
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
-    camera.position.set(10, 10, 100);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+    // camera.position.set(10, 10, 100);
+    // camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    // initialize the campera's position
+    camera_spherical = new THREE.Spherical(100, Math.PI / 2, 0);
+    move_camera();
 }
 
 function init_scene() {
@@ -50,10 +55,13 @@ function init_light() {
 function init_events() {
     renderer.domElement.addEventListener('mousemove', onMouseMove);
     renderer.domElement.addEventListener('wheel', onMouseScroll);
-
-    var command = document.getElementById("command");
-    document.addEventListener("keydown", onCommandKeyDown, false);
 }
+
+function move_camera(){
+    camera.position.setFromSpherical(camera_spherical);
+    camera.lookAt(0,0,0);    
+}
+
 
 function draw_axes() {
     var material, geometry, line;
@@ -120,39 +128,47 @@ function onMouseMove(e) {
     var mouse_x = e.clientX / window.innerWidth;
     var mouse_y = e.clientY / window.innerHeight;
 
+    // NOTE: Mouse movements are inverted here.  For example, move the 
+    // camera down to make the model appear to rotate up, etc. 
+
     // latitude: pi (mouse at top) to 0 (mouse at bottom) 
-    var phi = (1 - mouse_y) * Math.PI; 
+    camera_spherical.phi = (1 - mouse_y) * Math.PI; 
 
     // longitude: +pi (mouse at left) to -pi (mouse at right)
-    var theta = (1 - (2*mouse_x)) * Math.PI;
+    camera_spherical.theta = (1 - (2*mouse_x)) * Math.PI;
 
-
-    // position camera at latitude / longitude
-    var s = new THREE.Spherical(100, phi, theta);
-    camera.position.setFromSpherical(s);
-    camera.lookAt(0,0,0);
-
-    // show long/lat in degrees, not radians
-    document.getElementById('lat').textContent = (phi * 180 / Math.PI).toFixed(2);
-    document.getElementById('long').textContent = (theta * 180 / Math.PI).toFixed(2);
-
-    //Show (x,y,z) of camera
-    document.getElementById('move-x').textContent = camera.position.x.toFixed(2);
-    document.getElementById('move-y').textContent = camera.position.y.toFixed(2);
-    document.getElementById('move-z').textContent = camera.position.z.toFixed(2);
+    move_camera();
+    show_camera_postion();
 
     renderer.render(scene, camera);
 }
 
 function onMouseScroll(e) {
-    var deltaY = e.deltaY;
-    var scroll = document.getElementById('scroll');
+    var scroll_amount = e.deltaY;
+    var scroll_speed = 0.01;
+    var radius = camera_spherical.radius * (1 + (scroll_speed * scroll_amount));
+    if (radius < 10) radius = 10;
+    if (radius > 10000) radius = 10000;
+    camera_spherical.radius = radius;
 
-    scroll.textContent = deltaY;
+    move_camera();
+    show_camera_postion();
+
+    renderer.render(scene, camera);
 };
 
 function onCommandKeyDown(e) 
 {
-    var keyCode = e.keyCode;
-    return false;
 };
+
+function show_camera_postion() {
+    // show long/lat in degrees, not radians
+    document.getElementById('camera-radius').textContent = (camera_spherical.radius).toFixed(2);
+    document.getElementById('camera-lat').textContent = (camera_spherical.phi * 180 / Math.PI).toFixed(2);
+    document.getElementById('camera-long').textContent = (camera_spherical.theta * 180 / Math.PI).toFixed(2);
+
+    //Show (x,y,z) of camera
+    document.getElementById('camera-x').textContent = camera.position.x.toFixed(2);
+    document.getElementById('camera-y').textContent = camera.position.y.toFixed(2);
+    document.getElementById('camera-z').textContent = camera.position.z.toFixed(2);    
+}
