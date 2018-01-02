@@ -1,100 +1,118 @@
-var lines = [];
+var container, camera, scene, light, renderer;
 
-var renderer = new THREE.WebGLRenderer();
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-var container = document.getElementById("container");
-container.appendChild(renderer.domElement);
-//document.body.appendChild(renderer.domElement);
+init();
+draw();
+animate();
 
-var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
-camera.position.set(10, 10, 100);
-camera.lookAt(new THREE.Vector3(0, 0, 0));
+function init() {
+    init_renderer();
+    init_container();
+    init_camera();
+    init_scene();
+    init_light();
+    init_events();
+}
 
-var scene = new THREE.Scene();
+function draw() {
+    draw_axes();
+    draw_model();
+}
 
-scene.add(new THREE.AmbientLight(0x555555));
-var light = new THREE.SpotLight(0xffffff, 1.5);
-light.position.set(0, 500, 2000);
-scene.add(light);   
+function init_renderer() {
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
+function init_container() {
+    container = document.getElementById("container");
+    container.appendChild(renderer.domElement);
+    //document.body.appendChild(renderer.domElement);
+}
 
-var material, geometry, line;
+function init_camera() {
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+    camera.position.set(10, 10, 100);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+}
 
-// Red X-Axis
-geometry = new THREE.Geometry();
-geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-geometry.vertices.push(new THREE.Vector3(10, 0, 0));
-material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-line = new THREE.Line(geometry, material);
-scene.add(line);
-lines.push(line);
+function init_scene() {
+    scene = new THREE.Scene();
+}
 
-// Green Y-Axis
-geometry = new THREE.Geometry();
-geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-geometry.vertices.push(new THREE.Vector3(0, 10, 0));
-material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-line = new THREE.Line(geometry, material);
-scene.add(line);
-lines.push(line);
+function init_light() {
+    scene.add(new THREE.AmbientLight(0x555555));
+    light = new THREE.SpotLight(0xffffff, 1.5);
+    light.position.set(0, 500, 2000);
+    scene.add(light);   
+}
 
+function init_events() {
+    renderer.domElement.addEventListener('mousemove', onMouseMove);
+    renderer.domElement.addEventListener('wheel', onMouseScroll);
 
-// Blue Z-Axis
-geometry = new THREE.Geometry();
-geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-geometry.vertices.push(new THREE.Vector3(0, 0, 10));
-material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-line = new THREE.Line(geometry, material);
-scene.add(line);
-lines.push(line);
+    var command = document.getElementById("command");
+    document.addEventListener("keydown", onCommandKeyDown, false);
+}
 
-// geometry = new THREE.BoxGeometry( 5, 5, 5 );
-// geometry.translate(2.5, 2.5, 2.5);
-// material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-// var cube = new THREE.Mesh( geometry, material );
-// scene.add( cube );
+function draw_axes() {
+    var material, geometry, line;
 
-geometry = new THREE.CylinderGeometry( 2.5, 2.5, 5, 64 );
-//geometry.translate(5, 5, 5);
-//material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-material = new THREE.MeshPhongMaterial({
-    color: 0xffff00,
-    flatShading: true,
-    vertexColors: THREE.VertexColors,
-    shininess: 0
-});
+    // Red X-Axis
+    geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    geometry.vertices.push(new THREE.Vector3(10, 0, 0));
+    material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    line = new THREE.Line(geometry, material);
+    scene.add(line);
 
-var cylinder = new THREE.Mesh( geometry, material );
-scene.add( cylinder );
-
-
-renderer.render(scene, camera);
-
-renderer.domElement.addEventListener('mousemove', onMouseMove);
-renderer.domElement.addEventListener('wheel', onMouseScroll);
-
-var command = document.getElementById("command");
-document.addEventListener("keydown", onCommandKeyDown, false);
+    // Green Y-Axis
+    geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    geometry.vertices.push(new THREE.Vector3(0, 10, 0));
+    material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+    line = new THREE.Line(geometry, material);
+    scene.add(line);
 
 
+    // Blue Z-Axis
+    geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    geometry.vertices.push(new THREE.Vector3(0, 0, 10));
+    material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+    line = new THREE.Line(geometry, material);
+    scene.add(line);
+}
+
+function draw_model() {
+    var material, geometry, cube, cylinder;
+
+    // geometry = new THREE.BoxGeometry( 5, 5, 5 );
+    // geometry.translate(2.5, 2.5, 2.5);
+    // material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    // cube = new THREE.Mesh( geometry, material );
+    // scene.add( cube );
+
+    geometry = new THREE.CylinderGeometry( 2.5, 2.5, 5, 64 );
+    //geometry.translate(5, 5, 5);
+    //material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    material = new THREE.MeshPhongMaterial({
+        color: 0xffff00,
+        flatShading: true,
+        vertexColors: THREE.VertexColors,
+        shininess: 0
+    });
+
+    cylinder = new THREE.Mesh( geometry, material );
+    scene.add( cylinder );
+}
 
 
 function animate () {
     //alert("Hello");
     requestAnimationFrame( animate );
-
-    // for (l of lines)
-    // {
-    //     l.rotation.x += 0.1;
-    //     l.rotation.y += 0.1;    
-    // }
-
     renderer.render(scene, camera);
 };
-
-animate();
-
 
 function onMouseMove(e) {
 
@@ -114,20 +132,6 @@ function onMouseMove(e) {
     camera.position.setFromSpherical(s);
     camera.lookAt(0,0,0);
 
-    // var rotation_amount = 0.1;
-    // for (l of lines)
-    // {
-    //     l.rotation.x += mouse_y * rotation_amount;
-    //     l.rotation.y += mouse_x * rotation_amount;
-    // }
-
-    // var move_x = document.getElementById('move-x');
-    // var move_y = document.getElementById('move-y');   
-    // var move_z = document.getElementById('move-z');   
-    // move_x.textContent = phi * 180 / Math.PI;
-    // move_y.textContent = theta  * 180 / Math.PI;
-    // move_y.textContent = theta  * 180 / Math.PI;
-
     // show long/lat in degrees, not radians
     document.getElementById('lat').textContent = (phi * 180 / Math.PI).toFixed(2);
     document.getElementById('long').textContent = (theta * 180 / Math.PI).toFixed(2);
@@ -142,25 +146,13 @@ function onMouseMove(e) {
 
 function onMouseScroll(e) {
     var deltaY = e.deltaY;
-
     var scroll = document.getElementById('scroll');
 
     scroll.textContent = deltaY;
-
-    // var e = window.event || e;
-    // var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail || -e.deltaY)));
-    // var scale_amount = 0.1;
-    // for (l of lines)
-    //  {
-    //     l.scale.x *= (1 + scale_amount * delta);
-    //     l.scale.y *= (1 + scale_amount * delta);
-    //     l.scale.z *= (1 + scale_amount * delta);
-    // }
 };
 
 function onCommandKeyDown(e) 
 {
     var keyCode = e.keyCode;
-    //alert(keyCode);
     return false;
 };
