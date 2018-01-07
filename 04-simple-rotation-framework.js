@@ -33,7 +33,7 @@ function init_camera() {
     // camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     // initialize the campera's position
-    camera_spherical = new THREE.Spherical(500, Math.PI / 2, 0);
+    camera_spherical = new THREE.Spherical(100, Math.PI / 2, 0);
     move_camera();
 }
 
